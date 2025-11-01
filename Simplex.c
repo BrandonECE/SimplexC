@@ -5,11 +5,71 @@
 #include <string.h>
 #include <math.h>
 
-int main(int argc, char const *argv[])
-{
+// Función para leer enteros con validación
+int leerEntero(const char* mensaje, int min, int max) {
+    int valor;
+    char buffer[100];
+    
+    do {
+        system("cls");
+        printf("%s", mensaje);
+        
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            // Eliminar salto de línea
+            buffer[strcspn(buffer, "\n")] = 0;
+            
+            // Intentar convertir a número
+            char* endptr;
+            valor = strtol(buffer, &endptr, 10);
+            
+            // Verificar si la conversión fue exitosa
+            if (endptr != buffer && *endptr == '\0') {
+                // Verificar rango
+                if (valor >= min && valor <= max) {
+                    return valor;
+                } else {
+                    printf("Error: El valor debe estar entre %d y %d.\n", min, max);
+                }
+            } else {
+                printf("Error: '%s' no es un número válido.\n", buffer);
+            }
+        }
+        printf("Presione Enter para continuar...");
+        getchar();
+    } while (1);
+}
 
+// Función para leer doubles con validación
+double leerDouble(const char* mensaje) {
+    double valor;
+    char buffer[100];
+    
+    do {
+        system("cls");
+        printf("%s", mensaje);
+        
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            // Eliminar salto de línea
+            buffer[strcspn(buffer, "\n")] = 0;
+            
+            // Intentar convertir a número
+            char* endptr;
+            valor = strtod(buffer, &endptr);
+            
+            // Verificar si la conversión fue exitosa
+            if (endptr != buffer && *endptr == '\0') {
+                return valor;
+            } else {
+                printf("Error: '%s' no es un número válido.\n", buffer);
+            }
+        }
+        printf("Presione Enter para continuar...");
+        getchar();
+    } while (1);
+}
+
+int main() {
     // DECLARACION DE LAS PRIMERAS VARIABLES
-
     int maxormin;
     int nrestricciones;
     int nvariablesx;
@@ -17,16 +77,8 @@ int main(int argc, char const *argv[])
     //----------------------------------------------------------//
     //-------------------//
 
-
-
-    do
-    { // NUMERO DE VARIABLES DE DECISION
-
-        system("cls");
-        printf("Ingrese la cantidad de variables de decision que desea: ");
-        scanf("%d", &nvariablesx);
-
-    } while (nvariablesx <= 0);
+    // NUMERO DE VARIABLES DE DECISION (VALIDADO)
+    nvariablesx = leerEntero("Ingrese la cantidad de variables de decision que desea: ", 1, 100);
 
     double Arrayfo[nvariablesx];
     double impresion_original_Arrayfo[nvariablesx];
@@ -34,136 +86,84 @@ int main(int argc, char const *argv[])
     //----------------------------------------------------------//
     //-------------------//
 
-
-
-    //===ENTRADA E IMPRESION DE DATOS===//
-
-    // ENTRADA DE DATOS DE LA FUNCION OBJETIVO
-
-    for (int i = 0; i < nvariablesx; i++)
-    {
-        system("cls");
-        printf("Ingresa x%d de Funcion Objetivo (F.O): ", i + 1);
-        scanf("%lf", &Arrayfo[i]);
+    // ENTRADA DE DATOS DE LA FUNCION OBJETIVO (VALIDADO)
+    for (int i = 0; i < nvariablesx; i++) {
+        char mensaje[100];
+        sprintf(mensaje, "Ingresa x%d de Funcion Objetivo (F.O): ", i + 1);
+        Arrayfo[i] = leerDouble(mensaje);
         impresion_original_Arrayfo[i] = Arrayfo[i];
     }
 
-    do
-    {
-
-        system("cls");
-        printf("Ingrese para su Funcion Objetivo(F.O):\n\nPresiona 1 si deseas MINIMIZAR\nPresiona 2 si deseas MAXIMIZAR\n\n: ");
-        scanf("%d", &maxormin);
-
-    } while (maxormin > 2 || maxormin < 1);
+    // MAXIMIZAR O MINIMIZAR (VALIDADO)
+    maxormin = leerEntero("Ingrese para su Funcion Objetivo(F.O):\n\nPresiona 1 si deseas MINIMIZAR\nPresiona 2 si deseas MAXIMIZAR\n\n: ", 1, 2);
 
     //----------------------------------------------------------//
     //-------------------//
 
+    // ENTRADA DE DATOS DE LAS RESTRICCIONES FISICAS (VALIDADO)
+    nrestricciones = leerEntero("Ingrese cuantas restricciones fisica desea: ", 1, 100);
 
+    double Arrayrestricciones[nrestricciones][nvariablesx + 2];
+    int base[nrestricciones];
 
-
-    // ENTRADA DE DATOS DE LAS RESTRICCIONES FISICAS
-
-    do
-    { // NUMERO DE RESTRICCIONES
-
-        system("cls");
-        printf("Ingrese cuantas restricciones fisica desea: ");
-        scanf("%d", &nrestricciones);
-
-    } while (nrestricciones <= 0);
-
-    double Arrayrestricciones[nrestricciones][nvariablesx + 2]; // DECLARACION DEL ARRAY QUE CONTIENE LAS RESTRICCIONES
-                                                             // Numero de variables x + [ 1 = "<=", 2 = ">=", 3 = "="] + value
-
-    int base[nrestricciones];                                                   
-
-    for (int i = 0; i < nrestricciones; i++)
-    {
-
-        for (int j = 0; j < nvariablesx; j++)
-        {
-            system("cls");
-            printf("Ingresa x%d de la restriccion N.%d: ", j + 1, i + 1);
-            scanf("%lf", &Arrayrestricciones[i][j]);
+    for (int i = 0; i < nrestricciones; i++) {
+        for (int j = 0; j < nvariablesx; j++) {
+            char mensaje[100];
+            sprintf(mensaje, "Ingresa x%d de la restriccion N.%d: ", j + 1, i + 1);
+            Arrayrestricciones[i][j] = leerDouble(mensaje);
         }
 
-        do
-        {
-            system("cls");
-            printf("Ingrese que tipo de limitante es:\n\nPresiona 1 si tu limitante es: <=\nPresiona 2 si tu limitante es: >=\nPresiona 3 si tu limitante es:  =\n\n: "); // FALTA AÑADIR EL 3
-            scanf("%lf", &Arrayrestricciones[i][nvariablesx]);
-        } while (Arrayrestricciones[i][nvariablesx] > 3 || Arrayrestricciones[i][nvariablesx] < 1);
+        // TIPO DE LIMITANTE (VALIDADO)
+        Arrayrestricciones[i][nvariablesx] = leerEntero(
+            "Ingrese que tipo de limitante es:\n\nPresiona 1 si tu limitante es: <=\nPresiona 2 si tu limitante es: >=\nPresiona 3 si tu limitante es: =\n\n: ", 
+            1, 3
+        );
 
         base[i] = Arrayrestricciones[i][nvariablesx];
 
-        system("cls");
-        printf("Ingresa el valor limitante de la restriccion N.%d: ", i + 1);
-        scanf("%lf", &Arrayrestricciones[i][nvariablesx + 1]);
+        // VALOR LIMITANTE (VALIDADO)
+        char mensaje[100];
+        sprintf(mensaje, "Ingresa el valor limitante de la restriccion N.%d: ", i + 1);
+        Arrayrestricciones[i][nvariablesx + 1] = leerDouble(mensaje);
     }
 
     //----------------------------------------------------------//
     //-------------------//
 
-
-
-
-
-
-
-    // ENTRADA DE DATOS DE LAS RESTRICCIONES LOGICAS
-
-
+    // ENTRADA DE DATOS DE LAS RESTRICCIONES LOGICAS (VALIDADO)
     int decision_restriccion_logica;
-
-    do
-    {
-        system("cls");
-        printf("Eliga sus restricciones logica:\n\n");
-        printf("Desea que todas sus variables [ ");
-        for (int i = 0; i < nvariablesx; i++)
-        {
-            printf("x%d ", i+1);
-        }
-        printf("] sean >= 0 ?\n");
-        printf("\nPresiona 1 --> SI\nPresiona 2 --> NO\n\n: ");
-        scanf("%d", &decision_restriccion_logica);
-
-    } while (decision_restriccion_logica != 1 && decision_restriccion_logica != 2);
-
     
+    decision_restriccion_logica = leerEntero(
+        "Eliga sus restricciones logicas:\n\n"
+        "Desea que todas sus variables sean >= 0 ?\n"
+        "\nPresiona 1 --> SI\nPresiona 2 --> NO\n\n: ", 
+        1, 2
+    );
 
+    int cont_nvariablex_sin_restriccion_logica = 0;
+    int nvariablex_restriccion_logica[nvariablesx];
 
-
-    int cont_nvariablex_sin_restriccion_logica = 0;//CANTIDAD DE VARIABLES EXTRA VIPRIMAS
-    int nvariablex_restriccion_logica[nvariablesx];//ARRAY QUE CONTIENE QUE VAIRABLES X NECESITAN UNA X VIPRIMA
-
-    if (decision_restriccion_logica == 1){
-
-        for (int i = 0; i < nvariablesx; i++){ 
-            nvariablex_restriccion_logica[i] = 1;//EN EL CASO DE QUE SE HAYA ELEGIDO QUE TODAS TIENEN RESTRICCION LOGICA ENTONCES EL VALOR SERA 1
+    if (decision_restriccion_logica == 1) {
+        for (int i = 0; i < nvariablesx; i++) { 
+            nvariablex_restriccion_logica[i] = 1;
         }
-        
-
-    }
-    else
-    {
-        for (int i = 0; i < nvariablesx; i++)
-        {
-            do
-            {
-                system("cls");
-                printf("Eliga sus restricciones logica:\n\n");
-                printf("[ x%d ] >= 0 ?\n", i+1);
-                printf("\nPresiona 1 --> CON RESTRICCION\nPresiona 2 --> SIN RESTRICCION\n\n: ");
-                scanf("%d", &nvariablex_restriccion_logica[i]);
-            } while (nvariablex_restriccion_logica[i] != 1 && nvariablex_restriccion_logica[i] != 2);
-            if (nvariablex_restriccion_logica[i] == 2) ++cont_nvariablex_sin_restriccion_logica;//SI SE ELIGIO LA OPCION 2, ES DECIR QUE CIERTA VARIABLE X NO TENGA RESTRICCION LOGICA ENTONCES SE INCREMENTARA EL CONTADOR PARA SABER CUANTAS VIPRIMAS TENDREMOS
+    } else {
+        for (int i = 0; i < nvariablesx; i++) {
+            char mensaje[100];
+            sprintf(mensaje, 
+                "Eliga sus restricciones logicas:\n\n"
+                "[ x%d ] >= 0 ?\n"
+                "\nPresiona 1 --> CON RESTRICCION\n"
+                "Presiona 2 --> SIN RESTRICCION\n\n: ", 
+                i + 1
+            );
+            nvariablex_restriccion_logica[i] = leerEntero(mensaje, 1, 2);
             
+            if (nvariablex_restriccion_logica[i] == 2) {
+                cont_nvariablex_sin_restriccion_logica++;
+            }
         }
     }
-
 
 
 
